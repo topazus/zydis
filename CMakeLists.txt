@@ -53,6 +53,9 @@ option(ZYDIS_BUILD_MAN
 option(ZYDIS_BUILD_DOXYGEN
     "Build doxygen documentation (requires Doxygen)"
     ON)
+option(ZYDIS_BUILD_TESTS
+    "Build tests"
+    OFF)
 option(ZYDIS_FUZZ_AFL_FAST
     "Enables AFL persistent mode and reduces prints in ZydisFuzzIn"
     OFF)
@@ -490,4 +493,29 @@ if (ZYDIS_BUILD_MAN)
         install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${MAN_NAME}" TYPE MAN)
     endforeach()
     add_custom_target(man ALL DEPENDS ${MAN_NAMES})
+endif ()
+
+# =============================================================================================== #
+# Tests                                                                                           #
+# =============================================================================================== #
+if (ZYDIS_BUILD_TESTS)
+    enable_testing()
+    find_package(Python 3 REQUIRED)
+    add_test(
+        NAME "ZydisRegression"
+        COMMAND python3
+            regression.py
+            test
+            ${PROJECT_BINARY_DIR}/ZydisInfo
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests"
+    )
+    add_test(
+        NAME "ZydisRegressionEncoder"
+        COMMAND python3
+            regression_encoder.py
+            ${PROJECT_BINARY_DIR}/ZydisFuzzReEncoding
+            ${PROJECT_BINARY_DIR}/ZydisFuzzEncoder
+            ${PROJECT_BINARY_DIR}/ZydisTestEncoderAbsolute
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests"
+    )
 endif ()
